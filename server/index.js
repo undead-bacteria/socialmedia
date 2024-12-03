@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const { errorHandler, logger } = require("./middlewares/main");
+
 const connectDB = require("/config/db");
 
 const corsOptions = {
@@ -19,6 +21,8 @@ app.use(express.urlencoded({ extended: false }));
 app.get("/", (req, res) => {
   res.send("Server is working");
 });
+
+app.use(logger);
 
 const PORT = process.env.PORT || 5000;
 
