@@ -34,7 +34,7 @@ const addComment = async (email, postId, message) => {
       },
     };
   } catch (error) {
-    console.log("Error while adding comment", e);
+    console.log("Error while adding comment", error);
   }
 };
 
@@ -68,7 +68,7 @@ const getComments = async (postId) => {
       },
     };
   } catch (error) {
-    console.log("Error while fetching comments", e);
+    console.log("Error while fetching comments", error);
   }
 };
 
@@ -88,7 +88,7 @@ const deleteComment = async (commentId) => {
       response: { success: true, message: "Comment deleted" },
     };
   } catch (error) {
-    console.log("Error while deleting comment", e);
+    console.log("Error while deleting comment", error);
   }
 };
 
