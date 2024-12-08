@@ -352,3 +352,224 @@ const getAllPosts = async (email) => {
     console.log("Error", e);
   }
 };
+
+const likePost = async (email, postId, like) => {
+  const user = await User.findOne({ email: email }).select({ _id: 1 });
+  if (!user) {
+    return {
+      statusCode: 400,
+      response: {
+        success: false,
+        message: "User not found",
+        notification: {
+          value: true,
+          message: "User not found",
+        },
+      },
+    };
+  }
+
+  const post = await Post.findById(postId).select({ likes: 1 });
+  if (!post) {
+    return {
+      statusCode: 400,
+      response: {
+        success: false,
+        message: "Post does not exist",
+        notification: {
+          value: true,
+          message: "Post does not exist",
+        },
+      },
+    };
+  }
+
+  // Check if user already liked the post
+  const userIndex = post.likes.indexOf(user._id);
+
+  if (like) {
+    // If the user wants to like the post
+    if (userIndex < 0) {
+      // User hasn't liked the post yet, so add to likes
+      post.likes.unshift(user._id);
+      await post.save();
+
+      return {
+        statusCode: 200,
+        response: {
+          success: true,
+          message: "Post liked",
+          notification: {
+            value: true,
+            message: "You liked a post",
+          },
+        },
+      };
+    } else {
+      // User has already liked the post
+      return {
+        statusCode: 200,
+        response: {
+          success: true,
+          message: "Already liked post",
+          notification: {
+            value: true,
+            message: "Already liked the post",
+          },
+        },
+      };
+    }
+  } else {
+    // If the user wants to unlike the post
+    if (userIndex >= 0) {
+      // User has liked the post, so remove from likes
+      post.likes.splice(userIndex, 1);
+      await post.save();
+
+      return {
+        statusCode: 200,
+        response: {
+          success: true,
+          message: "Post unliked",
+          notification: {
+            value: true,
+            message: "Post Unliked",
+          },
+        },
+      };
+    } else {
+      // User has already unliked the post
+      return {
+        statusCode: 200,
+        response: {
+          success: true,
+          message: "Already unliked post",
+        },
+      };
+    }
+  }
+};
+
+const addSavedPost = async (email, postId, saved) => {
+  const user = await User.findOne({ email: email }).select({
+    _id: 1,
+    savedPosts: 1,
+  });
+  const savedPosts = user.savedPosts || [];
+
+  const post = await Post.findById(postId).select({ _id: 1 });
+  if (!post)
+    return {
+      statusCode: 400,
+      response: {
+        success: false,
+        message: "Post does not exist",
+        notification: {
+          value: true,
+          message: "Post does not exist",
+        },
+      },
+    };
+  const len = savedPosts.indexOf(postId);
+
+  if (saved) {
+    if (len < 0) {
+      savedPosts.unshift(postId);
+      await user.save();
+
+      return {
+        statusCode: 200,
+        response: {
+          success: true,
+          message: "Saved post",
+          data: savedPosts,
+          notification: {
+            value: true,
+            message: "Post is saved",
+          },
+        },
+      };
+    } else {
+      return {
+        statusCode: 200,
+        response: { success: true, message: "Already saved post" },
+      };
+    }
+  } else {
+    if (len >= 0) {
+      const index = savedPosts.indexOf(postId);
+      savedPosts.splice(index, 1);
+      await user.save();
+
+      return {
+        statusCode: 200,
+        response: { success: true, message: "Unsaved post", data: savedPosts },
+      };
+    } else {
+    }
+  }
+};
+
+const hidePost = async (email, postId, hide) => {
+  const user = await User.findOne({ email: email }).select({
+    _id: 1,
+  });
+
+  const userId = user._id;
+  const post = await Post.findById(postId).select({
+    _id: 1,
+    createdBy: 1,
+    hide: 1,
+  });
+  if (!post)
+    return {
+      statusCode: 400,
+      response: {
+        success: false,
+        message: "Post does not exist",
+        notification: {
+          value: true,
+          message: "Post does not exist",
+        },
+      },
+    };
+  if (!isUserOwner(userId, post.createdBy))
+    return {
+      statusCode: 400,
+      response: {
+        success: false,
+        message: "Post is not created by user",
+        notification: {
+          value: true,
+          message: "Post is not created by user",
+        },
+      },
+    };
+
+  post.hide = hide;
+  await post.save();
+
+  const message = hide ? "Post is hidden" : "post is visible";
+  return {
+    statusCode: 200,
+    response: {
+      success: true,
+      message,
+      notification: {
+        value: true,
+        message: message,
+      },
+    },
+  };
+};
+
+module.exports = {
+  createPost,
+  deletePost,
+  getUserPosts,
+  getSavedPosts,
+  getAllPosts,
+  likePost,
+  addSavedPost,
+  hidePost,
+};
