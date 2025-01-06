@@ -2,7 +2,6 @@ const User = require("../models/user.model");
 const Post = require("../models/post.model");
 const Comment = require("../models/comment.model");
 const PostService = require("./post.service");
-const { response } = require("express");
 
 const getUserName = async (id) => {
   const user = await User.findById(id).select({ name: 1 });

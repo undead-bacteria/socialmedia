@@ -1,4 +1,4 @@
-const logger = (rrq, res, next) => {
+const logger = (req, res, next) => {
   const url = req.url;
 
   res.on("finish", function () {

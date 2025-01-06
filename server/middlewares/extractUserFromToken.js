@@ -28,6 +28,15 @@ const extractUserFromToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    console.log("Token verification failed:", error);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).send({
+        success: false,
+        message: "Token has expired",
+      });
+    }
+
     return res.status(401).send({
       success: false,
       message: "Invalid or expired token",

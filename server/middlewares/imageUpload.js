@@ -34,7 +34,7 @@ const imageUpload = (req, res, next) => {
   upload.array("images")(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
-        return res.status(400).josn({ error: err.message });
+        return res.status(400).json({ error: err.message });
       } else {
         return res.status(400).json({ error: err.message });
       }

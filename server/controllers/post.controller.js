@@ -6,7 +6,7 @@ const createPost = async (req, res, next) => {
       req.body,
       req.files
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -16,7 +16,7 @@ const getUserPosts = async (req, res, next) => {
   try {
     const { email } = req.body;
     const { statusCode, response } = await PostService.getUserPosts(email);
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -29,7 +29,7 @@ const deletePost = async (req, res, next) => {
       email,
       postId
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -39,17 +39,18 @@ const getSavedPosts = async (req, res, next) => {
   try {
     const { email } = req.body;
     const { statusCode, response } = await PostService.getSavedPosts(email);
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
 };
 
+// gets all posts that user liked or saved
 const getAllPosts = async (req, res, next) => {
   try {
     const { email } = req.body;
     const { statusCode, response } = await PostService.getAllPosts(email);
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -63,7 +64,7 @@ const likePost = async (req, res, next) => {
       postId,
       like
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -77,7 +78,7 @@ const addSavedPost = async (req, res, next) => {
       postId,
       saved
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -91,7 +92,7 @@ const hidePost = async (req, res, next) => {
       postId,
       hide
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }

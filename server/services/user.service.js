@@ -2,17 +2,7 @@ const User = require("../models/user.model");
 const Post = require("../models/post.model");
 const path = require("path");
 const { removeFile } = require("./post.service");
-const cloudinary = require("cloudinary").v2;
-const dotenv = require("dotenv");
-
-dotenv.config();
-
-// cloudinary configuration
-cloudinary.config({
-  cloud_name: "",
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudinary = require("../config/cloudinary.config");
 
 // utility function to handle errors
 const handleError = (message, statusCode = 500) => {
@@ -169,13 +159,16 @@ const getFriends = async (email) => {
 // get user's photos
 const getPhotos = async (email) => {
   try {
-    const user = await user.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) return handleError("User not found", 404);
 
     const posts = await Post.find({ createdBy: user._id })
       .sort({ createdAt: -1 })
       .select("images");
     const images = posts.flatMap((post) => post.images);
+    if (!images || images.length === 0) {
+      return handleError("No photos found", 404);
+    }
 
     return {
       statusCode: 200,
@@ -194,7 +187,7 @@ const getPhotos = async (email) => {
 // update profile text (name, location, description)
 const updateProfileText = async (email, location, name, description) => {
   try {
-    const user = await user.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) return handleError("User not found", 404);
 
     user.location = location;
@@ -219,7 +212,7 @@ const updateProfileText = async (email, location, name, description) => {
 // update profile image (cover or profile)
 const updateProfileImage = async (email, imageType, files) => {
   try {
-    const user = await user.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) return handleError("User not found", 404);
 
     const file = files[0];

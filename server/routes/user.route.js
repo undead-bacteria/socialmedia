@@ -8,14 +8,14 @@ const extractUserFromToken = require("../middlewares/extractUserFromToken");
 router.use(extractUserFromToken);
 
 router.get("/me", UserController.getUserInfo);
-router.get("/getFriends", UserController.getFriends);
+router.get("/get-friends", UserController.getFriends);
 router.get("/photos/:email", UserController.getPhotos);
-router.post("/addFriends", UserController.addFriend);
-router.post("/profile/updateText", UserController.getUserProfileText);
+router.post("/add-friends", UserController.addFriend);
+router.post("/profile/update-text", UserController.updateProfileText);
 router.post(
-  "/profile/updateImage",
+  "/profile/update-image",
   imageUpload,
-  UserController.getUserProfileImage
+  UserController.updateProfileImage
 );
 
 module.exports = router;

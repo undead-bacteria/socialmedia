@@ -5,7 +5,7 @@ const getUserInfo = async (req, res, next) => {
     const user = req.user;
     const { statusCode, response } = await UserService.getUserInfo(user.email);
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -23,7 +23,7 @@ const addFriend = async (req, res, next) => {
       add
     );
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -34,7 +34,7 @@ const getFriends = async (req, res, next) => {
     const user = req.user;
     const { statusCode, response } = await UserService.getFriends(user.email);
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -43,9 +43,9 @@ const getFriends = async (req, res, next) => {
 const getPhotos = async (req, res, next) => {
   try {
     const user = req.user;
-    const { statusCode, response } = await UserService.getphotos(user.email);
+    const { statusCode, response } = await UserService.getPhotos(user.email);
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -63,7 +63,7 @@ const updateProfileText = async (req, res, next) => {
       description
     );
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -73,13 +73,21 @@ const updateProfileImage = async (req, res, next) => {
   try {
     const { imageType } = req.body;
     const user = req.user;
-    const { statusCode, response } = await UserService.getProfileImage(
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No imae file uploaded",
+      });
+    }
+
+    const { statusCode, response } = await UserService.updateProfileImage(
       user.email,
       imageType,
       req.files
     );
 
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }

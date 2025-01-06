@@ -8,7 +8,7 @@ const addComment = async (req, res, next) => {
       postId,
       message
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -18,7 +18,7 @@ const getComments = async (req, res, next) => {
   try {
     const { postId } = req.body;
     const { statusCode, response } = await CommentService.getComments(postId);
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }
@@ -30,7 +30,7 @@ const deleteComment = async (req, res, next) => {
     const { statusCode, response } = await CommentService.deleteComment(
       commentId
     );
-    res.status(statusCode).send(response);
+    res.status(statusCode).json(response);
   } catch (error) {
     next(error);
   }

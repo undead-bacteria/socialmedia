@@ -55,6 +55,8 @@ const hasUserLiked = (arrayofLikes, userId) => {
 };
 
 const createPost = async (body, file) => {
+  console.log("inside createPost");
+
   const { email, content } = body;
 
   try {
@@ -122,7 +124,7 @@ const createPost = async (body, file) => {
 
 const deletePost = async (email, postId) => {
   try {
-    const user = await User.findOne({ email: email }).select({ _id: 1 });
+    const user = await user.findOne({ email: email }).select({ _id: 1 });
 
     const userId = user._id;
     const post = await Post.findById(postId);
@@ -202,14 +204,12 @@ const getUserPosts = async (email) => {
           profileImage: 1,
         });
 
-        const savedPosts = user.savedPosts || [];
-
         return {
           ...item._doc,
           name: userAvatar.name,
           avatar: userAvatar.profileImage,
           postTime: postCreationTime(item._doc.createdAt),
-          saved: savedPosts.includes(item._id),
+          saved: user.savedPosts.includes(item.id) ? true : false,
           owner: true,
           like: hasUserLiked(item.likes, user._id),
           likeCount: item.likes.length,
@@ -249,7 +249,7 @@ const getSavedPosts = async (email) => {
     const user = await User.findOne({ email: email }).select({
       _id: 1,
       name: 1,
-      savedPosts: 1,
+      savedPost: 1,
       friends: 1,
     });
 
@@ -306,17 +306,15 @@ const getSavedPosts = async (email) => {
   }
 };
 
-// gets all posts that user liked or saved
 const getAllPosts = async (email) => {
   try {
     const user = await User.findOne({ email: email }).select({
       _id: 1,
       name: 1,
-      savedPosts: 1,
+      savedPost: 1,
       friends: 1,
     });
 
-    const savedPosts = user.savedPosts || [];
     var posts = await Post.find().sort({ createdAt: -1 });
 
     posts = await Promise.all(
@@ -332,7 +330,7 @@ const getAllPosts = async (email) => {
           name: userAvatar.name,
           avatar: userAvatar.profileImage,
           postTime: postCreationTime(item.createdAt),
-          saved: savedPosts.includes(item._id),
+          saved: user.savedPosts.includes(item._id) ? true : false,
           owner: isUserOwner(user._id, item.createdBy),
           like: hasUserLiked(item.likes, user._id),
           likeCount: item.likes.length,
@@ -354,19 +352,7 @@ const getAllPosts = async (email) => {
       },
     };
   } catch (error) {
-    console.log("Error", error);
-
-    return {
-      statusCode: 500,
-      response: {
-        success: false,
-        message: "An error occurred while fetching posts",
-        notification: {
-          value: true,
-          message: "An error occurred while fetching posts",
-        },
-      },
-    };
+    console.log("Error", e);
   }
 };
 
@@ -590,3 +576,132 @@ module.exports = {
   addSavedPost,
   hidePost,
 };
+
+const PostService = require("../services/post.service");
+
+const createPost = async (req, res, next) => {
+  try {
+    const { statusCode, response } = await PostService.createPost(
+      req.body,
+      req.files
+    );
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getUserPosts = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const { statusCode, response } = await PostService.getUserPosts(email);
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deletePost = async (req, res, next) => {
+  try {
+    const { email, postId } = req.body;
+    const { statusCode, response } = await PostService.deletePost(
+      email,
+      postId
+    );
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSavedPosts = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const { statusCode, response } = await PostService.getSavedPosts(email);
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAllPosts = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const { statusCode, response } = await PostService.getAllPosts(email);
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const likePost = async (req, res, next) => {
+  try {
+    const { email, postId, like } = req.body;
+    const { statusCode, response } = await PostService.likePost(
+      email,
+      postId,
+      like
+    );
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const addSavedPost = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const { statusCode, response } = await PostService.addSavedPost(
+      email,
+      postId,
+      saved
+    );
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const hidePost = async (req, res, next) => {
+  try {
+    const { email, postId, hide } = req.body;
+    const { statusCode, response } = await PostService.hidePost(
+      email,
+      postId,
+      hide
+    );
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createPost,
+  deletePost,
+  getUserPosts,
+  getSavedPosts,
+  getAllPosts,
+  likePost,
+  addSavedPost,
+  hidePost,
+};
+
+
+const express = require("express");
+const router = express.Router();
+const { imageUpload } = require("../middlewares/imageUpload");
+
+const PostController = require("../controllers/post.controller");
+
+router.post("/create-post", imageUpload, PostController.createPost);
+router.post("/delete-post", PostController.deletePost);
+router.post("/get-user-posts", PostController.getUserPosts);
+router.post("/get-all-posts", PostController.getAllPosts);
+router.post("/get-saved-posts", PostController.getSavedPosts);
+router.post("/save-post", PostController.addSavedPost);
+router.post("/like-post", PostController.likePost);
+router.post("/hide-post", PostController.hidePost);
+
+module.exports = router;
+

@@ -1,20 +1,30 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const createUser = async (body) => {
+  if (!body.email || !body.name || !body.password) {
+    return {
+      success: false,
+      message: "Email, name and password are required",
+    };
+  }
+
   try {
     const user = await User.findOne({ email: body.email });
     if (user) {
       return { success: false, message: "User already exists" };
     }
 
-    const hasehdPassword = await bcrypt.hash(body.password, 10);
+    const hashedPassword = await bcrypt.hash(body.password, 10);
 
     // create the new user object
     const newUser = new User({
       email: body.email,
-      password: hasehdPassword,
+      name: body.name,
+      password: hashedPassword,
     });
     await newUser.save();
 
@@ -44,8 +54,8 @@ const loginUser = async (body) => {
     }
 
     // generate a jwt token
-    const token = jwt.sign({ id: user._id }, "your_jwt_secret", {
-      expirsIn: "1h",
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
     });
 
     return { success: true, message: "Login successful", token: token };

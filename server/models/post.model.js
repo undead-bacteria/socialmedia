@@ -26,7 +26,7 @@ const PostSchema = new mongoose.Schema(
       default: false,
     },
     commentCount: {
-      type: String,
+      type: Number,
       default: "0",
     },
   },

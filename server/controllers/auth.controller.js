@@ -1,8 +1,7 @@
 const AuthService = require("../services/auth.service");
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (req, res) => {
   const body = req.body;
-
   try {
     const response = await AuthService.createUser(body);
 
@@ -19,7 +18,7 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-const loginUser = async (req, res, next) => {
+const loginUser = async (req, res) => {
   const body = req.body;
 
   try {
