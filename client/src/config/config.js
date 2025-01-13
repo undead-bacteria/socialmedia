@@ -105,73 +105,73 @@ export const config = {
   urls: {
     auth: {
       logIn: () => {
-        return `${import.meta.env.BACKEND_URL}/auth/login`;
+        return `${process.env.BACKEND_URL}/auth/login`;
       },
     },
 
     post: {
       createPost: () => {
-        return `${import.meta.env.BACKEND_URL}/post/createPost`;
+        return `${process.env.BACKEND_URL}/post/create-post`;
       },
       getUserPosts: () => {
-        return `${import.meta.env.BACKEND_URL}/post/getUserPosts`;
+        return `${process.env.BACKEND_URL}/post/getUserPosts`;
       },
       getAllPosts: () => {
-        return `${import.meta.env.BACKEND_URL}/post/getAllPosts`;
+        return `${process.env.BACKEND_URL}/post/getAllPosts`;
       },
       getSavedPosts: () => {
-        return `${import.meta.env.BACKEND_URL}/post/getSavedPosts`;
+        return `${process.env.BACKEND_URL}/post/getSavedPosts`;
       },
       hidePost: () => {
-        return `${import.meta.env.BACKEND_URL}/post/hidePost`;
+        return `${process.env.BACKEND_URL}/post/hidePost`;
       },
       deletePost: () => {
-        return `${import.meta.env.BACKEND_URL}/post/deletePost`;
+        return `${process.env.BACKEND_URL}/post/deletePost`;
       },
       savePost: () => {
-        return `${import.meta.env.BACKEND_URL}/post/savePost`;
+        return `${process.env.BACKEND_URL}/post/savePost`;
       },
       likePost: () => {
-        return `${import.meta.env.BACKEND_URL}/post/likePost`;
+        return `${process.env.BACKEND_URL}/post/likePost`;
       },
     },
 
     user: {
       getUserInfo: () => {
-        return `${import.meta.env.BACKEND_URL}/user`;
+        return `${process.env.BACKEND_URL}/user`;
       },
       getFriends: () => {
-        return `${import.meta.env.BACKEND_URL}/user`;
+        return `${process.env.BACKEND_URL}/user`;
       },
       getPhotos: () => {
-        return `${import.meta.env.BACKEND_URL}/user/getPhotos`;
+        return `${process.env.BACKEND_URL}/user/getPhotos`;
       },
       updateProfileText: () => {
-        return `${import.meta.env.BACKEND_URL}/user/updateProfileText`;
+        return `${process.env.BACKEND_URL}/user/updateProfileText`;
       },
       updateProfileImage: () => {
-        return `${import.meta.env.BACKEND_URL}/user/profile/updateImage`;
+        return `${process.env.BACKEND_URL}/user/profile/updateImage`;
       },
       addFriend: () => {
-        return `${import.meta.env.BACKEND_URL}/user/addFriend`;
+        return `${process.env.BACKEND_URL}/user/addFriend`;
       },
     },
 
     comment: {
       addComment: () => {
-        return `${import.meta.env.BACKEND_URL}/comment/addComment`;
+        return `${process.env.BACKEND_URL}/comment/addComment`;
       },
       getComments: () => {
-        return `${import.meta.env.BACKEND_URL}/comment`;
+        return `${process.env.BACKEND_URL}/comment`;
       },
     },
 
     notification: {
       addNotification: () => {
-        return `${import.meta.env.BACKEND_URL}/notification/addNotification`;
+        return `${process.env.BACKEND_URL}/notification/addNotification`;
       },
       getNotifications: () => {
-        return `${import.meta.env.BACKEND_URL}/notification`;
+        return `${process.env.BACKEND_URL}/notification`;
       },
     },
   },

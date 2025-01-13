@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  TextField,
-  TextareaAutosize,
-  makeStyles,
-} from "@mui/material";
+import { Box, Button, Card, TextField } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useState } from "react";
@@ -168,6 +160,7 @@ const CreatePost = () => {
             fontSize: "0.95rem",
             paddingX: "1.5rem",
           }}
+          onChange={onShare}
         >
           Share
         </Button>
