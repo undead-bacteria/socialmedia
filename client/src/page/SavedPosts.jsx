@@ -9,9 +9,9 @@ import Loading from "../component/Loading";
 const SavedPosts = () => {
   const auth = useSelector((state) => state.auth.user);
 
-  const { data, error, isError, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryFn: () => fetchSavedPosts({ email: auth.email }),
-    queryKey: ["SavedPosts"],
+    queryKey: ["savedPosts"],
   });
 
   if (isLoading) {
@@ -21,7 +21,7 @@ const SavedPosts = () => {
   return (
     <Box>
       <Typography
-        sx={{ color: "var(--grayTitle)", fontSize: "4rem", opcaity: "0.3" }}
+        sx={{ color: "var(--grayTitle)", fontSize: "2rem", opcaity: "0.3" }}
       >
         SavedPosts
       </Typography>

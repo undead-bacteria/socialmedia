@@ -2,7 +2,7 @@ import React from "react";
 import { Avatar } from "@mui/material";
 
 const UserAvatar = ({ name, avatar }) => {
-  const userInitial = name[0].toUpperCase();
+  const userInitial = name && name[0] ? name[0].toUpperCase() : "";
   return (
     <>
       {avatar ? (

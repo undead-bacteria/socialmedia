@@ -12,7 +12,7 @@ import axios from "axios";
 
 const CreatePost = () => {
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState([]);
   const auth = useSelector((state) => state.auth.user);
   const queryClient = useQueryClient();
 
@@ -69,7 +69,6 @@ const CreatePost = () => {
           maxRows={10}
           resize="both"
           sx={{
-            resize: "both",
             overflow: "auto",
             textarea: {
               resize: "both",
@@ -92,7 +91,7 @@ const CreatePost = () => {
         {image &&
           image.map((item) => {
             return (
-              <Box>
+              <Box key={item.name}>
                 <img
                   style={{ borderRadius: "1rem" }}
                   alt="not found"
@@ -131,7 +130,7 @@ const CreatePost = () => {
             alignItems: "center",
           }}
         >
-          <Box sx={{ display: flex, alignItems: "center", gap: 0.4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.4 }}>
             <label
               htmlFor="image-upload"
               style={{ display: "flex", alignItems: "center" }}
@@ -143,11 +142,20 @@ const CreatePost = () => {
               type="file"
               id="image-upload"
               style={{ display: "none" }}
-              name="myImage"
+              name="images"
               accept="image/*"
               multiple
               onChange={(event) => {
-                setImage(Object.values(event.target.files));
+                const newImages = Object.values(event.target.files);
+                setImage((prevState) => {
+                  return [
+                    ...prevState,
+                    ...newImages.filter(
+                      (newImage) =>
+                        !prevState.some((image) => image.name === newImage.name)
+                    ),
+                  ];
+                });
               }}
             />
           </Box>
@@ -160,9 +168,9 @@ const CreatePost = () => {
             fontSize: "0.95rem",
             paddingX: "1.5rem",
           }}
-          onChange={onShare}
+          onClick={onShare}
         >
-          Share
+          Post
         </Button>
       </Box>
     </Card>

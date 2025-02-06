@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
 
   filename: (req, file, cb) => {
     const fileExtension = path.extname(file.originalname);
-    const uniqueName = `${file.fieldname}-${Date.now()}$fileExtension`;
+    const uniqueName = `${file.fieldname}-${Date.now()}${fileExtension}`;
     cb(null, uniqueName);
   },
 });
@@ -39,7 +39,16 @@ const imageUpload = (req, res, next) => {
         return res.status(400).json({ error: err.message });
       }
     }
-    // procees to the next middleware or route handler
+
+    if (
+      (req.body.imageType === "profile" || req.body.imageType === "cover") &&
+      req.files.length !== 0 &&
+      req.files.length !== 1
+    ) {
+      return res.status(400).json({
+        error: "Profile image should be exactly one file or no changes",
+      });
+    }
     next();
   });
 };

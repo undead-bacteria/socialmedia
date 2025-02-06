@@ -8,6 +8,7 @@ export const deletePost = async (body) => {
       Authorization: "Bearer " + getAccessToken(),
     },
   });
+  console.log("Hello", data);
   return data.data;
 };
 
@@ -41,7 +42,20 @@ export const likePost = async (body) => {
 
 export const updateProfileText = async (body) => {
   const { data } = await axios.post(
-    config.urls.post.updateProfileText(),
+    config.urls.user.updateProfileText(),
+    body,
+    {
+      headers: {
+        Authorization: "Bearer " + getAccessToken(),
+      },
+    }
+  );
+  return data.data;
+};
+
+export const updateProfileDescription = async (body) => {
+  const { data } = await axios.post(
+    config.urls.user.updateProfileDescription(),
     body,
     {
       headers: {
@@ -54,7 +68,7 @@ export const updateProfileText = async (body) => {
 
 export const updateProfileImage = async (body) => {
   const { data } = await axios.post(
-    config.urls.post.updateProfileImage(),
+    config.urls.user.updateProfileImage(),
     body,
     {
       headers: {

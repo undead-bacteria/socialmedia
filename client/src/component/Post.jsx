@@ -1,7 +1,402 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  ImageList,
+  ImageListItem,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import {
+  likePost,
+  addComment,
+  addNotification,
+  addFriend,
+} from "../reactQuery/mutation";
+import { useSelector } from "react-redux";
+import { useMutation, useQueryClient } from "react-query";
+import PostOptions from "./PostOptions";
+import Comment from "./Comment";
+import UserAvatar from "./UserAvatar";
 
-const Post = () => {
-  return <div>Post</div>;
+const Post = ({
+  name,
+  content,
+  imageData,
+  avatar,
+  time,
+  postId,
+  saved,
+  owner,
+  hide,
+  pageName,
+  likeBoolean,
+  likeCount,
+  commentMessageCount = 0,
+  friend,
+  createdBy,
+}) => {
+  const [option, setOption] = useState(false);
+  const [like, setLike] = useState(likeBoolean);
+  const [count, setCount] = useState(likeCount);
+  const [commentCount, setCommentCount] = useState(commentMessageCount);
+  const [openComment, setOpenComment] = useState(false);
+  const [commentMessage, setCommentMessage] = useState("");
+  const [friendStatus, setFriendStatus] = useState(friend);
+
+  const auth = useSelector((state) => state.auth.user);
+  const queryClient = useQueryClient();
+
+  const notificationMutation = useMutation({
+    mutationFn: (body) => addNotification(body),
+    onSuccess: () => {
+      console.log("Notification mutation success");
+    },
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: (body) => likePost(body),
+    onSuccess: async (body) => {
+      console.log("like mutation success");
+
+      if (!owner) {
+        notificationMutation.mutate({
+          type: "like",
+          postId: body.postId,
+          email: auth.email,
+          value: body.like,
+        });
+      }
+      await queryClient.invalidateQueries({
+        queryKey: ["userPosts"],
+        exact: true,
+        refreshType: "inactive",
+      });
+    },
+  });
+
+  const commentMutation = useMutation({
+    mutationFn: (body) => addComment(body),
+    onMutate: async (body) => {
+      setCommentCount((old) => Number(old) + 1);
+      queryClient.setQueriesData(["comments", postId], (oldData) => {
+        const newData = [
+          {
+            name: auth.name,
+            time: "0 second ago",
+            messahe: body.message,
+            avatar: auth.avatar,
+            id: Math.floor(Math.random() * 90000) + 10000,
+          },
+          ...oldData,
+        ];
+        return newData;
+      });
+    },
+    onSuccess: async (queryKey, body) => {
+      console.log("comment mutation success");
+      await queryClient.invalidateQueries(["comments", postId]);
+
+      if (!owner) {
+        notificationMutation.mutate({
+          type: "comment",
+          postId: body.postId,
+          email: auth.email,
+          value: true,
+        });
+      }
+    },
+  });
+
+  const friendMutation = useMutation({
+    mutationFn: (body) => addFriend(body),
+    onMutate: async (body) => {},
+    onSuccess: async (queryKey, body) => {
+      console.log("friend mutation success");
+
+      if (!owner) {
+        notificationMutation.mutate({
+          type: "follow",
+          postId: body.postId,
+          email: auth.email,
+          value: body.add,
+        });
+      }
+      queryClient.setQueriesData(["posts"], (oldData) => {
+        const newData = oldData.map((item) => {
+          if (body.friendId === item.createdBy) {
+            item.friend = body.add;
+            item.new = "new";
+          }
+          return item;
+        });
+        return newData;
+      });
+
+      queryClient.setQueriesData(["savedPosts"], (oldData) => {
+        const newData = oldData.map((item) => {
+          if (body.friendId === item.createdBy) {
+            item.friend = body.add;
+            item.new = "new";
+          }
+          return item;
+        });
+        return newData;
+      });
+    },
+  });
+
+  const clickLike = (changeState) => {
+    likeMutation.mutate({
+      email: auth.email,
+      postId: postId,
+      like: changeState,
+    });
+    setLike(changeState);
+    changeState
+      ? setCount((count) => count + 1)
+      : setCount((count) => count - 1);
+  };
+
+  const clickFollow = (changeState) => {
+    friendMutation.mutate({
+      email: auth.email,
+      friendId: createdBy,
+      add: changeState,
+      postId,
+    });
+    setFriendStatus(changeState);
+  };
+
+  const clickCommentEnter = () => {
+    if (commentMessage !== "") {
+      setOpenComment(true);
+      setCommentMessage("");
+      commentMutation.mutate({
+        email: auth.email,
+        postId,
+        message: commentMessage,
+      });
+    }
+  };
+
+  useEffect(() => {
+    setFriendStatus(friend);
+  }, [friend]);
+
+  const dots = [];
+  for (let i = 0; i < 3; i++) {
+    dots.push(
+      <Box
+        key={i}
+        sx={{
+          height: "0.2rem",
+          width: "0.2rem",
+          borderRadius: "0.2rem",
+          backgroundColor: "var(--grayTitle)",
+        }}
+      ></Box>
+    );
+  }
+
+  return (
+    <Box sx={{ position: "relative" }}>
+      {option && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 60,
+            right: -14,
+            width: "31%",
+            zIndex: 200,
+          }}
+        >
+          <PostOptions
+            postId={postId}
+            saved={saved}
+            owner={owner}
+            hide={hide}
+            pageName={pageName}
+            setOption={setOption}
+            otherData={{
+              content,
+              name,
+              imageData,
+              time,
+              postId,
+              saved,
+              owner,
+              hide,
+              pageName,
+            }}
+          />
+        </Box>
+      )}
+      <Card sx={{ padding: "1.3rem" }} onClick={() => setOption(false)}>
+        {/* Title  */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+            }}
+          >
+            <UserAvatar avatar={auth.avatar} name={auth.name} />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Typography>
+                <b>{`${name}`} </b>shared an album
+              </Typography>
+              <Typography>{`${time}`} ago.</Typography>
+            </Box>
+            {!owner && (
+              <Typography
+                sx={{
+                  ml: "2rem",
+                  color: friendStatus ? "var(--grayTitle)" : "var(--blue)",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => clickFollow(!friendStatus)}
+              ></Typography>
+            )}
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.3,
+              cursor: "pointer",
+              padding: "0.5rem",
+            }}
+            onClick={(e) => {
+              setOption(!option);
+              e.stopPropagation();
+            }}
+          >
+            {dots}
+          </Box>
+        </Box>
+        {/* Content */}
+        <Typography
+          variant="body1"
+          sx={{ mt: "1.5rem", mb: "1.5rem", fontWeight: 400, fontSize: "1rem" }}
+        >
+          {content}
+        </Typography>
+        {/* images */}
+        {imageData.length > 0 && (
+          <ImageList variant="masonry" cols={2} rowHeight={300} gap={5}>
+            {imageData.map((item, index) => {
+              return (
+                <ImageListItem key={index}>
+                  <img
+                    src={item}
+                    alt="loading"
+                    loading="lazy"
+                    style={{
+                      borderRadius: "0.4rem",
+                    }}
+                  />
+                </ImageListItem>
+              );
+            })}
+          </ImageList>
+        )}
+        {/* Like, Comment, Share */}
+        <Box sx={{ display: "flex", gap: 5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+              cursor: "pointer",
+            }}
+          >
+            {" "}
+            {like ? (
+              <>
+                <FavoriteIcon
+                  sx={{ color: "red", borderColor: "black" }}
+                  onClick={() => clickLike(false)}
+                />
+                <Typography>{count}</Typography>
+              </>
+            ) : (
+              <>
+                <FavoriteBorderIcon onClick={() => clickLike(true)} />
+                <Typography>{count}</Typography>
+              </>
+            )}
+          </Box>
+          {/* Comment */}
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <ChatBubbleOutlineIcon
+              onClick={() => setOpenComment((old) => !old)}
+            />
+            <Typography>{commentCount}</Typography>
+          </Box>
+        </Box>
+        {/* Comment text */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: "2rem" }}>
+          <UserAvatar avatar={auth.avatar} name={auth.name} />
+          <TextField
+            placeholder="Leave a Comment"
+            variant="outlined"
+            fullWidth
+            InputProps={{
+              style: {
+                borderRadius: "2rem",
+              },
+              endAdornment: (
+                <InputAdornment position="start">
+                  <ArrowRightIcon
+                    sx={{ fontSize: "3rem", cursor: "pointer" }}
+                    onClick={() => clickCommentEnter()}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            value={commentMessage}
+            onChange={(e) => setCommentMessage(e.target.value)}
+            onKeyPress={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+
+                if (commentMessage !== "") {
+                  setOpenComment(true);
+                  setCommentMessage("");
+                  commentMutation.mutate({
+                    email: auth.email,
+                    postId,
+                    message: commentMessage,
+                  });
+                }
+              }
+            }}
+          />
+        </Box>
+        {/* Comment List */}
+        <Box sx={{ mt: "2rem", display: openComment ? "block" : "none" }}>
+          <Comment postId={postId} />
+        </Box>
+      </Card>
+    </Box>
+  );
 };
 
 export default Post;

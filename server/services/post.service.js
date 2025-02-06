@@ -3,7 +3,7 @@ const Post = require("../models/post.model");
 const fs = require("fs");
 const path = require("path");
 
-const cloudinary = require("../config/cloudinary.config");
+const cloudinary = require("../config/cloudinaryConfig");
 
 const postCreationTime = (date) => {
   const now = new Date();
@@ -589,4 +589,5 @@ module.exports = {
   likePost,
   addSavedPost,
   hidePost,
+  removeFile,
 };

@@ -53,13 +53,28 @@ const getPhotos = async (req, res, next) => {
 
 const updateProfileText = async (req, res, next) => {
   try {
-    const { location, name, description } = req.body;
+    const { location, name } = req.body;
     const user = req.user;
 
     const { statusCode, response } = await UserService.updateProfileText(
       user.email,
       location,
-      name,
+      name
+    );
+
+    res.status(statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateProfileDescription = async (req, res, next) => {
+  try {
+    const { description } = req.body;
+    const user = req.user;
+
+    const { statusCode, response } = await UserService.updateProfileDescription(
+      user.email,
       description
     );
 
@@ -73,13 +88,6 @@ const updateProfileImage = async (req, res, next) => {
   try {
     const { imageType } = req.body;
     const user = req.user;
-
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No imae file uploaded",
-      });
-    }
 
     const { statusCode, response } = await UserService.updateProfileImage(
       user.email,
@@ -99,5 +107,6 @@ module.exports = {
   getFriends,
   getPhotos,
   updateProfileText,
+  updateProfileDescription,
   updateProfileImage,
 };

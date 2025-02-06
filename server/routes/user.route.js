@@ -1,19 +1,26 @@
 const { Router } = require("express");
 const router = Router();
 const { imageUpload } = require("../middlewares/imageUpload");
-
+const { checkAuth } = require("../middlewares/checkAuth");
 const UserController = require("../controllers/user.controller");
-const extractUserFromToken = require("../middlewares/extractUserFromToken");
 
-router.use(extractUserFromToken);
-
-router.get("/me", UserController.getUserInfo);
-router.get("/get-friends", UserController.getFriends);
-router.get("/photos/:email", UserController.getPhotos);
-router.post("/add-friends", UserController.addFriend);
-router.post("/profile/update-text", UserController.updateProfileText);
+router.get("/me", checkAuth, UserController.getUserInfo);
+router.get("/get-friends", checkAuth, UserController.getFriends);
+router.get("/get-photos/", checkAuth, UserController.getPhotos);
+router.post("/add-friends", checkAuth, UserController.addFriend);
 router.post(
-  "/profile/update-image",
+  "/profile/update-profile-text",
+  checkAuth,
+  UserController.updateProfileText
+);
+router.post(
+  "/profile/update-profile-description",
+  checkAuth,
+  UserController.updateProfileDescription
+);
+router.post(
+  "/profile/update-profile-image",
+  checkAuth,
   imageUpload,
   UserController.updateProfileImage
 );

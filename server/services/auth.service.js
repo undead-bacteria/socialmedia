@@ -1,64 +1,71 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const admin = require("../config/firebaseConfig");
 const User = require("../models/user.model");
-const dotenv = require("dotenv");
-dotenv.config();
 
 const createUser = async (body) => {
-  if (!body.email || !body.name || !body.password) {
-    return {
-      success: false,
-      message: "Email, name and password are required",
-    };
-  }
-
   try {
-    const user = await User.findOne({ email: body.email });
-    if (user) {
-      return { success: false, message: "User already exists" };
+    let userRecord;
+    try {
+      userRecord = await admin.auth().getUserByEmail(body.email);
+    } catch (error) {
+      if (error.code === "auth/user-not-found") {
+        userRecord = await admin.auth().createUser({
+          email: body.email,
+          displayName: body.name,
+        });
+        console.log("New user created in Firebase Authentication.");
+      } else {
+        throw error;
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(body.password, 10);
+    let newUser = await User.findOne({ email: body.email });
 
-    // create the new user object
-    const newUser = new User({
-      email: body.email,
-      name: body.name,
-      password: hashedPassword,
-    });
-    await newUser.save();
+    if (!newUser) {
+      newUser = new User({
+        email: body.email,
+        name: body.name,
+        avatar: body.avatar,
+        firebaseUid: userRecord.uid,
+      });
 
-    return { success: true, message: "User created successfully" };
-  } catch (e) {
-    console.log("Error:", e);
+      await newUser.save();
+      console.log("New user saved to the database.");
+    }
+
+    return {
+      success: true,
+      message: "User created successfully",
+      user: {
+        email: userRecord.email,
+        displayName: userRecord.displayName,
+        uid: userRecord.uid,
+      },
+    };
+  } catch (error) {
+    console.log("Error in user creation:", error);
     return {
       success: false,
-      message: "An error occurred while creating the user",
+      message: error.message || "An error occurred while creating the user",
     };
   }
 };
 
 const loginUser = async (body) => {
   try {
-    const { email, password } = body;
+    const userRecord = await admin.auth().getUserByEmail(body.email);
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return { success: false, message: "User not found" };
-    }
+    const idToken = await admin.auth().createCustomToken(userRecord.uid);
 
-    // compare password using bcryptjs
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return { success: false, message: "Invalid credentials" };
-    }
-
-    // generate a jwt token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    return { success: true, message: "Login successful", token: token };
+    return {
+      success: true,
+      message: "Login successful",
+      user: {
+        name: userRecord.displayName,
+        email: userRecord.email,
+        uid: userRecord.uid,
+      },
+      token: idToken,
+    };
   } catch (error) {
     console.log("Error:", error);
     return {
@@ -68,4 +75,43 @@ const loginUser = async (body) => {
   }
 };
 
-module.exports = { createUser, loginUser };
+const googleLogin = async (idToken) => {
+  try {
+    const decodedUser = await admin.auth().verifyIdToken(idToken);
+
+    const email = decodedUser.email;
+    const name = decodedUser.name || email.split("@")[0];
+    const profileImage = decodedUser.picture;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        email,
+        name,
+        profileImage,
+      });
+      await user.save();
+    }
+
+    return {
+      success: true,
+      message: "Google login successful",
+      user: {
+        email: user.email,
+        name: user.name,
+        profileImage: user.profileImage,
+        description: user.description,
+        location: user.location,
+      },
+    };
+  } catch (error) {
+    console.log("Google login error:", error);
+    return {
+      success: false,
+      message: error.message || "An error occurred during Google login",
+    };
+  }
+};
+
+module.exports = { createUser, loginUser, googleLogin };

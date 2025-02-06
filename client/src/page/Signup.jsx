@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
   Divider,
   Stack,
-  TextField,
   Typography,
+  TextField,
+  Button,
   Link,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { getAccessToken } from "../utils/helper";
 import { config } from "../config/config";
 import { auth } from "../config/firebaseConfig";
+import { notify } from "../utils/notify";
 import axios from "axios";
 import { setUser } from "../store/slices/authSlice";
 import { setLoading } from "../store/slices/loaderSlice";
@@ -19,97 +20,100 @@ import { setLoading } from "../store/slices/loaderSlice";
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
+
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-const Login = () => {
+const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const loginRequest = async (body) => {
-    const res = await axios.post(config.urls.auth.logIn(), body, {
-      headers: {
-        Authorization: "Bearer " + getAccessToken(),
-      },
-    });
+  const signUpRequest = async (body) => {
+    try {
+      const res = await axios.post(config.urls.auth.signUp(), body, {
+        headers: {
+          Authorization: "Bearer " + getAccessToken(),
+          "Content-Type": "application/json",
+        },
+      });
+
+      return res.data;
+    } catch (error) {
+      console.error("Error during sign up request:", error);
+      return { success: false, message: error.message };
+    }
   };
 
-  const handleEmailPasswordLogin = async () => {
-    if (!email || !password) {
-      alert("Please enter both email and password.");
+  const handleSignUpWithEmail = async () => {
+    if (!name || !email || !password) {
+      console.error("Name, email, and password are required.");
       return;
     }
 
     dispatch(setLoading(true));
 
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = result.user;
-
       const idToken = await user.getIdToken();
 
-      const body = {
-        name: user.displayName,
-        email: user.email,
-        idToken: idToken,
+      // Send user data to the backend to create the user
+      const signUpBody = {
+        name,
+        email,
+        firebaseUid: user.uid,
       };
+      const response = await signUpRequest(signUpBody);
 
-      await loginRequest(body);
+      if (response) {
+        const { user } = response;
 
-      const { data } = await axios.get(
-        config.urls.user.getUserInfo(user.email),
-        {
-          headers: {
-            Authorization: "Bearer " + getAccessToken(),
-          },
-        }
-      );
+        // Save user to the global store
+        dispatch(
+          setUser({
+            email: user.email,
+            name: user.displayName,
+            avatar: user.avatar,
+          })
+        );
 
-      const globalUser = {
-        email: user.email,
-        name: data?.data?.name !== undefined ? data.data.name : user.name,
-        avatar:
-          data?.data?.profileImage !== undefined
-            ? data.data.profileImage
-            : null,
-      };
-
-      dispatch(setUser(globalUser));
-      localStorage.setItem("accessToken", idToken);
-      navigate("/home");
-    } catch (error) {
-      if (error.code === "auth/user-not-found") {
-        console.error("No user found with this email.");
-      } else if (error.code === "auth/wrong-password") {
-        console.error("Incorrect password.");
+        // Optionally save user data to localStorage
+        localStorage.setItem("accessToken", idToken);
+        notify("success", "User created successfully. Please login.");
+        navigate("/home");
       } else {
-        console.error("General login error:", error);
+        console.error("An error occurred.");
+        notify("error", "An error occurred.");
       }
+    } catch (error) {
+      console.error(error.message || "An error occurred during sign up.");
+      notify("error", "An error occurred.");
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     const provider = new GoogleAuthProvider();
-
     dispatch(setLoading(true));
 
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
       const idToken = await user.getIdToken();
 
       const signUpBody = {
         name: user.displayName,
         email: user.email,
-        profileImage: user.photoURL,
+        firebaseUid: user.uid,
       };
 
       const response = await axios.post(
@@ -131,16 +135,13 @@ const Login = () => {
             avatar: response.data.user.profileImage,
           })
         );
-
-        // Optionally save user data to localStorage
         localStorage.setItem("accessToken", idToken);
         navigate("/home");
       } else {
-        setError(response.data.message || "Google login failed.");
+        console.error(response.data.message || "Google login failed.");
       }
     } catch (error) {
-      console.error("google login error:", error);
-      setError(error.message || "An error occurred during Google login.");
+      console.error(error.message || "An error occurred during Google login.");
     } finally {
       dispatch(setLoading(false));
     }
@@ -163,19 +164,26 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        height: "60vh",
+        height: "70vh",
         flexDirection: "column",
       }}
     >
       <Typography
         sx={{ color: "var(--grayTitle)", fontSize: "3rem", opacity: "0.3" }}
       >
-        Login
+        Sign Up
       </Typography>
+
       <Stack direction={"column"} spacing={2} sx={{ mt: "2rem" }}>
         <TextField
+          label="Name"
+          variant="outlined"
+          fullWidth
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <TextField
           label="Email"
-          type="email"
           variant="outlined"
           fullWidth
           value={email}
@@ -189,22 +197,25 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <Button
           variant="contained"
           color="primary"
           fullWidth
-          onClick={handleEmailPasswordLogin}
+          onClick={handleSignUpWithEmail}
           sx={{ mt: 2 }}
         >
-          Login
+          Register
         </Button>
+
+        <Divider sx={{ my: 2 }}>OR</Divider>
 
         {config.loginItems.map((item) => {
           return (
             <div
               key={item.name}
               style={{ cursor: "pointer" }}
-              onClick={handleGoogleLogin}
+              onClick={handleGoogleSignUp}
             >
               <Box
                 sx={{
@@ -236,18 +247,18 @@ const Login = () => {
             </div>
           );
         })}
-        {/* Link to Signup Page */}
+        {/* Link to Login Page */}
         <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
           <Typography variant="body2" sx={{ mr: 1 }}>
-            Create an account!
+            Already have an account?
           </Typography>
           <Link
             component={RouterLink}
-            to="/signup"
+            to="/login"
             variant="body2"
             sx={{ fontWeight: "bold" }}
           >
-            Signup
+            Login
           </Link>
         </Stack>
       </Stack>
@@ -255,4 +266,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;

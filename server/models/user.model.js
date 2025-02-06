@@ -11,21 +11,26 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    password: {
+    firebaseUid: {
       type: String,
       required: true,
+      unique: true,
     },
     description: {
       type: String,
+      default: "",
     },
     location: {
       type: String,
+      default: "",
     },
     coverImage: {
       type: String,
+      default: "",
     },
     profileImage: {
       type: String,
+      default: "",
     },
     savedPosts: [
       {

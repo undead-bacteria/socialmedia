@@ -4,7 +4,6 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import GoogleIcon from "@mui/icons-material/Google";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from "@mui/icons-material/Share";
@@ -27,7 +26,7 @@ export const config = {
       icon: <GroupOutlinedIcon />,
     },
     {
-      name: "savedPosts",
+      name: "saved-posts",
       title: "Saved Posts",
       icon: <BookmarkBorderIcon />,
     },
@@ -81,10 +80,6 @@ export const config = {
       name: "Google",
       icon: <GoogleIcon sx={{ fontSize: "2.5rem" }} />,
     },
-    {
-      name: "Github",
-      icon: <GitHubIcon sx={{ fontSize: "2.5rem" }} />,
-    },
   ],
 
   postInteraction: [
@@ -105,73 +100,82 @@ export const config = {
   urls: {
     auth: {
       logIn: () => {
-        return `${process.env.BACKEND_URL}/auth/login`;
+        return `${process.env.REACT_APP_BACKEND_URL}/auth/login`;
+      },
+      signUp: () => {
+        return `${process.env.REACT_APP_BACKEND_URL}/auth/signup`;
+      },
+      googleLogin: () => {
+        return `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
       },
     },
 
     post: {
       createPost: () => {
-        return `${process.env.BACKEND_URL}/post/create-post`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/create-post`;
       },
       getUserPosts: () => {
-        return `${process.env.BACKEND_URL}/post/getUserPosts`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/get-user-posts`;
       },
       getAllPosts: () => {
-        return `${process.env.BACKEND_URL}/post/getAllPosts`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/get-all-posts`;
       },
       getSavedPosts: () => {
-        return `${process.env.BACKEND_URL}/post/getSavedPosts`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/get-saved-posts`;
       },
       hidePost: () => {
-        return `${process.env.BACKEND_URL}/post/hidePost`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/hide-post`;
       },
       deletePost: () => {
-        return `${process.env.BACKEND_URL}/post/deletePost`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/delete-post`;
       },
       savePost: () => {
-        return `${process.env.BACKEND_URL}/post/savePost`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/save-post`;
       },
       likePost: () => {
-        return `${process.env.BACKEND_URL}/post/likePost`;
+        return `${process.env.REACT_APP_BACKEND_URL}/post/like-post`;
       },
     },
 
     user: {
       getUserInfo: () => {
-        return `${process.env.BACKEND_URL}/user`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/me`;
       },
       getFriends: () => {
-        return `${process.env.BACKEND_URL}/user`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/get-friends`;
       },
       getPhotos: () => {
-        return `${process.env.BACKEND_URL}/user/getPhotos`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/get-photos`;
       },
       updateProfileText: () => {
-        return `${process.env.BACKEND_URL}/user/updateProfileText`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/profile/update-profile-text`;
+      },
+      updateProfileDescription: () => {
+        return `${process.env.REACT_APP_BACKEND_URL}/user/profile/update-profile-description`;
       },
       updateProfileImage: () => {
-        return `${process.env.BACKEND_URL}/user/profile/updateImage`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/profile/update-profile-image`;
       },
       addFriend: () => {
-        return `${process.env.BACKEND_URL}/user/addFriend`;
+        return `${process.env.REACT_APP_BACKEND_URL}/user/add-friend`;
       },
     },
 
     comment: {
       addComment: () => {
-        return `${process.env.BACKEND_URL}/comment/addComment`;
+        return `${process.env.REACT_APP_BACKEND_URL}/comment/add-comment`;
       },
       getComments: () => {
-        return `${process.env.BACKEND_URL}/comment`;
+        return `${process.env.REACT_APP_BACKEND_URL}/comment`;
       },
     },
 
     notification: {
       addNotification: () => {
-        return `${process.env.BACKEND_URL}/notification/addNotification`;
+        return `${process.env.REACT_APP_BACKEND_URL}/notification/add-notification`;
       },
       getNotifications: () => {
-        return `${process.env.BACKEND_URL}/notification`;
+        return `${process.env.REACT_APP_BACKEND_URL}/notification`;
       },
     },
   },

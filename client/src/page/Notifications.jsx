@@ -26,7 +26,7 @@ const Notifications = () => {
   return (
     <Box>
       <Typography
-        sx={{ color: "var(--grayTitle)", fontSize: "4rem", opcaity: "0.3" }}
+        sx={{ color: "var(--grayTitle)", fontSize: "2rem", opcaity: "0.3" }}
       >
         Notifications
       </Typography>

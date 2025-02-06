@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 const Post = require("../models/post.model");
 const path = require("path");
 const { removeFile } = require("./post.service");
-const cloudinary = require("../config/cloudinary.config");
+const cloudinary = require("../config/cloudinaryConfig");
 
 // utility function to handle errors
 const handleError = (message, statusCode = 500) => {
@@ -165,10 +165,8 @@ const getPhotos = async (email) => {
     const posts = await Post.find({ createdBy: user._id })
       .sort({ createdAt: -1 })
       .select("images");
+
     const images = posts.flatMap((post) => post.images);
-    if (!images || images.length === 0) {
-      return handleError("No photos found", 404);
-    }
 
     return {
       statusCode: 200,
@@ -185,14 +183,13 @@ const getPhotos = async (email) => {
 };
 
 // update profile text (name, location, description)
-const updateProfileText = async (email, location, name, description) => {
+const updateProfileText = async (email, location, name) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return handleError("User not found", 404);
 
     user.location = location;
     user.name = name;
-    user.description = description;
     await user.save();
 
     return {
@@ -209,17 +206,48 @@ const updateProfileText = async (email, location, name, description) => {
   }
 };
 
+const updateProfileDescription = async (email, description) => {
+  try {
+    const user = await User.findOne({ email }).select({ description: 1 });
+    if (!user) return handleError("User not found", 404);
+
+    user.description = description;
+    await user.save();
+
+    return {
+      statusCode: 200,
+      response: {
+        success: true,
+        message: "About me is updated.",
+        notification: { value: true, message: "About me is updated." },
+      },
+    };
+  } catch (e) {
+    console.error("Error updating profile description:", e);
+    return handleError("An error occurred while updating profile description");
+  }
+};
+
 // update profile image (cover or profile)
 const updateProfileImage = async (email, imageType, files) => {
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select({
+      coverImage: 1,
+      profileImage: 1,
+    });
     if (!user) return handleError("User not found", 404);
+
+    if (!files || files.length === 0) {
+      return handleError("No file changes", 200);
+    }
 
     const file = files[0];
     const imagePath = path.join("./uploads", file.filename);
+
     const uploadResult = await cloudinary.uploader.upload(imagePath, {
       public_id: file.filename,
     });
+
     removeFile(file.filename);
 
     if (imageType === "cover") {
@@ -252,6 +280,7 @@ module.exports = {
   addFriend,
   getFriends,
   getPhotos,
+  updateProfileDescription,
   updateProfileText,
   updateProfileImage,
 };
