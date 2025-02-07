@@ -72,7 +72,7 @@ const likePost = async (req, res, next) => {
 
 const addSavedPost = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const { email, postId, saved } = req.body;
     const { statusCode, response } = await PostService.addSavedPost(
       email,
       postId,

@@ -114,6 +114,7 @@ const SignUp = () => {
         name: user.displayName,
         email: user.email,
         firebaseUid: user.uid,
+        idToken,
       };
 
       const response = await axios.post(
@@ -121,7 +122,7 @@ const SignUp = () => {
         signUpBody,
         {
           headers: {
-            Authorization: "Bearer " + getAccessToken(),
+            Authorization: `Bearer ${idToken}`,
           },
         }
       );

@@ -81,7 +81,7 @@ export const updateProfileImage = async (body) => {
 };
 
 export const addFriend = async (body) => {
-  const { data } = await axios.post(config.urls.post.addFriend(), body, {
+  const { data } = await axios.post(config.urls.user.addFriend(), body, {
     headers: {
       Authorization: "Bearer " + getAccessToken(),
     },
@@ -90,7 +90,7 @@ export const addFriend = async (body) => {
 };
 
 export const addComment = async (body) => {
-  const { data } = await axios.post(config.urls.post.addComment(), body, {
+  const { data } = await axios.post(config.urls.comment.addComment(), body, {
     headers: {
       Authorization: "Bearer " + getAccessToken(),
     },
@@ -99,10 +99,14 @@ export const addComment = async (body) => {
 };
 
 export const addNotification = async (body) => {
-  const { data } = await axios.post(config.urls.post.addNotification(), body, {
-    headers: {
-      Authorization: "Bearer " + getAccessToken(),
-    },
-  });
+  const { data } = await axios.post(
+    config.urls.notification.addNotification(),
+    body,
+    {
+      headers: {
+        Authorization: "Bearer " + getAccessToken(),
+      },
+    }
+  );
   return data.data;
 };

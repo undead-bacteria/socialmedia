@@ -82,6 +82,7 @@ const googleLogin = async (idToken) => {
     const email = decodedUser.email;
     const name = decodedUser.name || email.split("@")[0];
     const profileImage = decodedUser.picture;
+    const firebaseUid = decodedUser.uid;
 
     let user = await User.findOne({ email });
 
@@ -90,6 +91,9 @@ const googleLogin = async (idToken) => {
         email,
         name,
         profileImage,
+        firebaseUid,
+        description: "",
+        location: "",
       });
       await user.save();
     }

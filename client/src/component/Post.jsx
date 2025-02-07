@@ -164,13 +164,32 @@ const Post = ({
   };
 
   const clickFollow = (changeState) => {
-    friendMutation.mutate({
-      email: auth.email,
-      friendId: createdBy,
-      add: changeState,
-      postId,
-    });
-    setFriendStatus(changeState);
+    friendMutation.mutate(
+      {
+        email: auth.email,
+        friendId: createdBy,
+        add: changeState,
+        postId,
+      },
+      {
+        onMutate: () => {
+          setFriendStatus(changeState);
+
+          queryClient.setQueryData(
+            ["profileFollowingList", auth.email],
+            (oldFollowing) => {
+              if (changeState) {
+                return [...oldFollowing, createdBy];
+              } else {
+                return oldFollowing.filter(
+                  (following) => following !== createdBy
+                );
+              }
+            }
+          );
+        },
+      }
+    );
   };
 
   const clickCommentEnter = () => {
@@ -260,20 +279,21 @@ const Post = ({
               }}
             >
               <Typography>
-                <b>{`${name}`} </b>shared an album
+                <b>{`${name}`} </b>shared a post.
               </Typography>
               <Typography>{`${time}`} ago.</Typography>
             </Box>
             {!owner && (
               <Typography
                 sx={{
-                  ml: "2rem",
                   color: friendStatus ? "var(--grayTitle)" : "var(--blue)",
                   fontWeight: 500,
                   cursor: "pointer",
                 }}
                 onClick={() => clickFollow(!friendStatus)}
-              ></Typography>
+              >
+                {friendStatus ? "Unfollow" : "Follow"}
+              </Typography>
             )}
           </Box>
           <Box

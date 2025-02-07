@@ -306,7 +306,7 @@ const getSavedPosts = async (email) => {
   }
 };
 
-// gets all posts that user liked or saved
+// gets all posts that user liked or saved or unliked or unsaved or not have friends
 const getAllPosts = async (email) => {
   try {
     const user = await User.findOne({ email: email }).select({
@@ -317,10 +317,10 @@ const getAllPosts = async (email) => {
     });
 
     const savedPosts = user.savedPosts || [];
-    var posts = await Post.find().sort({ createdAt: -1 });
+    let posts = await Post.find().sort({ createdAt: -1 });
 
     posts = await Promise.all(
-      user.savedPosts.map(async (item) => {
+      posts.map(async (item) => {
         const userAvatar = await User.findById(item.createdBy).select({
           _id: 1,
           name: 1,

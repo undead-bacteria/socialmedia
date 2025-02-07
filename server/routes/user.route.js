@@ -7,7 +7,7 @@ const UserController = require("../controllers/user.controller");
 router.get("/me", checkAuth, UserController.getUserInfo);
 router.get("/get-friends", checkAuth, UserController.getFriends);
 router.get("/get-photos/", checkAuth, UserController.getPhotos);
-router.post("/add-friends", checkAuth, UserController.addFriend);
+router.post("/add-friend", checkAuth, UserController.addFriend);
 router.post(
   "/profile/update-profile-text",
   checkAuth,
