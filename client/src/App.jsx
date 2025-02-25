@@ -16,6 +16,7 @@ import Loading from "./component/Loading";
 import Navigation from "./component/Navigation";
 import axios from "axios";
 import { setUser } from "./store/slices/authSlice";
+import NoContent from "./component/NoContent";
 
 const ProtectedLayout = ({ children }) => {
   return (

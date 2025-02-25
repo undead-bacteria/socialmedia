@@ -1,4 +1,5 @@
 const CommentService = require("../services/comment.service");
+const User = require("../models/user.model");
 
 const addComment = async (req, res, next) => {
   try {
@@ -27,8 +28,14 @@ const getComments = async (req, res, next) => {
 const deleteComment = async (req, res, next) => {
   try {
     const { commentId } = req.body;
+    const firebaseUid = req.user.uid;
+    const user = await User.findOne({ firebaseUid });
+
+    const userId = user._id.toString();
+
     const { statusCode, response } = await CommentService.deleteComment(
-      commentId
+      commentId,
+      userId
     );
     res.status(statusCode).json(response);
   } catch (error) {

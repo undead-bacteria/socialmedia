@@ -8,8 +8,7 @@ export const deletePost = async (body) => {
       Authorization: "Bearer " + getAccessToken(),
     },
   });
-  console.log("Hello", data);
-  return data.data;
+  return data;
 };
 
 export const hidePost = async (body) => {
@@ -27,7 +26,6 @@ export const savePost = async (body) => {
       Authorization: "Bearer " + getAccessToken(),
     },
   });
-  console.log("Saved", data);
   return data.data;
 };
 
@@ -37,7 +35,7 @@ export const likePost = async (body) => {
       Authorization: "Bearer " + getAccessToken(),
     },
   });
-  return data.data;
+  return data;
 };
 
 export const updateProfileText = async (body) => {
@@ -95,7 +93,7 @@ export const addComment = async (body) => {
       Authorization: "Bearer " + getAccessToken(),
     },
   });
-  return data.data;
+  return data;
 };
 
 export const addNotification = async (body) => {
@@ -108,5 +106,15 @@ export const addNotification = async (body) => {
       },
     }
   );
-  return data.data;
+  return data;
+};
+
+export const deleteComment = async (commentId) => {
+  const body = { commentId: commentId };
+  const { data } = await axios.post(config.urls.comment.deleteComment(), body, {
+    headers: {
+      Authorization: "Bearer " + getAccessToken(),
+    },
+  });
+  return data;
 };

@@ -19,16 +19,16 @@ import {
   addFriend,
 } from "../reactQuery/mutation";
 import { useSelector } from "react-redux";
-import { useMutation, useQueryClient } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import PostOptions from "./PostOptions";
 import Comment from "./Comment";
 import UserAvatar from "./UserAvatar";
+import { fetchComments } from "../reactQuery/query";
 
 const Post = ({
   name,
   content,
   imageData,
-  avatar,
   time,
   postId,
   saved,
@@ -62,7 +62,7 @@ const Post = ({
   const likeMutation = useMutation({
     mutationFn: (body) => likePost(body),
     onSuccess: async (body) => {
-      console.log("like mutation success");
+      console.log("Like mutation success:", body);
 
       if (!owner) {
         notificationMutation.mutate({
@@ -74,8 +74,7 @@ const Post = ({
       }
       await queryClient.invalidateQueries({
         queryKey: ["userPosts"],
-        exact: true,
-        refreshType: "inactive",
+        refreshType: "all",
       });
     },
   });
@@ -89,7 +88,7 @@ const Post = ({
           {
             name: auth.name,
             time: "0 second ago",
-            messahe: body.message,
+            message: body.message,
             avatar: auth.avatar,
             id: Math.floor(Math.random() * 90000) + 10000,
           },
@@ -98,16 +97,17 @@ const Post = ({
         return newData;
       });
     },
-    onSuccess: async (queryKey, body) => {
+    onSuccess: async (body) => {
       console.log("comment mutation success");
       await queryClient.invalidateQueries(["comments", postId]);
+      console.log("comment", body);
 
       if (!owner) {
         notificationMutation.mutate({
           type: "comment",
           postId: body.postId,
           email: auth.email,
-          value: true,
+          value: body.comment,
         });
       }
     },
@@ -115,10 +115,7 @@ const Post = ({
 
   const friendMutation = useMutation({
     mutationFn: (body) => addFriend(body),
-    onMutate: async (body) => {},
-    onSuccess: async (queryKey, body) => {
-      console.log("friend mutation success");
-
+    onSuccess: async (body) => {
       if (!owner) {
         notificationMutation.mutate({
           type: "follow",
@@ -204,9 +201,21 @@ const Post = ({
     }
   };
 
-  useEffect(() => {
-    setFriendStatus(friend);
-  }, [friend]);
+  const { data: comments, isLoading } = useQuery({
+    queryFn: () => fetchComments({ postId }),
+    queryKey: ["comments", postId],
+  });
+
+  useEffect(
+    () => {
+      if (comments) {
+        setCommentCount(comments.length);
+      }
+      setFriendStatus(friend);
+    },
+    [comments],
+    [friend]
+  );
 
   const dots = [];
   for (let i = 0; i < 3; i++) {
@@ -412,7 +421,11 @@ const Post = ({
         </Box>
         {/* Comment List */}
         <Box sx={{ mt: "2rem", display: openComment ? "block" : "none" }}>
-          <Comment postId={postId} />
+          <Comment
+            postId={postId}
+            setCommentCount={setCommentCount}
+            postOwnerId={createdBy}
+          />
         </Box>
       </Card>
     </Box>

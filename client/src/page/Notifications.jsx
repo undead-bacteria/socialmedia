@@ -26,7 +26,7 @@ const Notifications = () => {
   return (
     <Box>
       <Typography
-        sx={{ color: "var(--grayTitle)", fontSize: "2rem", opcaity: "0.3" }}
+        sx={{ color: "var(--grayTitle)", fontSize: "2rem", opacity: "0.3" }}
       >
         Notifications
       </Typography>
@@ -52,8 +52,8 @@ const Notifications = () => {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <UserAvatar name={item.name} avatar={item.avatar} />
                   <Typography>
-                    <b>{item.name}</b>
-                    {item.message}
+                    <b>{item.name} </b>
+                    {item.message}.
                   </Typography>
                 </Box>
                 <Divider sx={{ mb: "1rem", mt: "1rem" }} />

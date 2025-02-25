@@ -26,6 +26,8 @@ const addComment = async (email, postId, message) => {
       response: {
         success: true,
         message: "Comment added",
+        postId,
+        comment,
         notification: {
           value: true,
           message: "Comment added",
@@ -71,13 +73,28 @@ const getComments = async (postId) => {
   }
 };
 
-const deleteComment = async (commentId) => {
+const deleteComment = async (commentId, userId) => {
   try {
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return {
         statusCode: 404,
         response: { success: false, message: "Comment not found" },
+      };
+    }
+
+    const post = await Post.findById(comment.post);
+
+    if (
+      comment.createdBy.toString() !== userId &&
+      post.createdBy.toString() !== userId
+    ) {
+      return {
+        statusCode: 403,
+        response: {
+          success: false,
+          message: " You aren't authorized to delete this comment",
+        },
       };
     }
     await comment.deleteOne();
@@ -88,6 +105,13 @@ const deleteComment = async (commentId) => {
     };
   } catch (error) {
     console.log("Error while deleting comment", error);
+    return {
+      statusCode: 500,
+      response: {
+        success: false,
+        message: "An error occurred while deleting the comment",
+      },
+    };
   }
 };
 

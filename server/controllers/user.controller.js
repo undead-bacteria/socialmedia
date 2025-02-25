@@ -15,7 +15,6 @@ const addFriend = async (req, res, next) => {
   try {
     const { friendId, add } = req.body;
     const user = req.user;
-    console.log("Body", req.body);
 
     const { statusCode, response } = await UserService.addFriend(
       user.email,

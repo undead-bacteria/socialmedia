@@ -5,10 +5,6 @@ const { getUserName } = require("./comment.service");
 const { postCreationTime } = require("./post.service");
 
 const addNotification = async (type, postId, email, value) => {
-  console.log("type", type);
-  console.log("postId", postId);
-  console.log("email", email);
-
   try {
     const user = await User.findOne({ email: email }).select({ _id: 1 });
 
@@ -27,9 +23,9 @@ const addNotification = async (type, postId, email, value) => {
         statusCode: 200,
         response: {
           success: true,
-          message: "notification added",
+          message: "Notification added",
           notification: {
-            value: false,
+            value: true,
           },
         },
       };
@@ -96,6 +92,7 @@ const getNotifications = async (email) => {
           time: postCreationTime(item.createdAt),
           avatar: notificationUser.profileImage,
           id: item.id,
+          value: true,
         };
       })
     );
@@ -106,7 +103,7 @@ const getNotifications = async (email) => {
         success: true,
         data: notifications,
         notification: {
-          value: false,
+          value: true,
         },
       },
     };

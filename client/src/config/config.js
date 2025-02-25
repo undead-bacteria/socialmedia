@@ -165,6 +165,9 @@ export const config = {
       addComment: () => {
         return `${process.env.REACT_APP_BACKEND_URL}/comment/add-comment`;
       },
+      deleteComment: () => {
+        return `${process.env.REACT_APP_BACKEND_URL}/comment/delete-comment`;
+      },
       getComments: () => {
         return `${process.env.REACT_APP_BACKEND_URL}/comment`;
       },

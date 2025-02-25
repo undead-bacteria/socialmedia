@@ -189,7 +189,6 @@ const getUserPosts = async (email) => {
       savedPost: 1,
       friends: 1,
     });
-    console.log("user", user);
 
     let posts = await Post.find({ createdBy: user._id }).sort({
       createdAt: -1,
@@ -371,7 +370,7 @@ const getAllPosts = async (email) => {
 };
 
 const likePost = async (email, postId, like) => {
-  const user = await User.findOne({ email: email }).select({ _id: 1 });
+  const user = await User.findOne({ email: email }).select("email _id ");
   if (!user) {
     return {
       statusCode: 400,
@@ -416,6 +415,8 @@ const likePost = async (email, postId, like) => {
         response: {
           success: true,
           message: "Post liked",
+          postId,
+          like,
           notification: {
             value: true,
             message: "You liked a post",
@@ -429,6 +430,8 @@ const likePost = async (email, postId, like) => {
         response: {
           success: true,
           message: "Already liked post",
+          postId,
+          like,
           notification: {
             value: true,
             message: "Already liked the post",
@@ -448,6 +451,8 @@ const likePost = async (email, postId, like) => {
         response: {
           success: true,
           message: "Post unliked",
+          postId,
+          like,
           notification: {
             value: true,
             message: "Post Unliked",
@@ -461,6 +466,8 @@ const likePost = async (email, postId, like) => {
         response: {
           success: true,
           message: "Already unliked post",
+          postId,
+          like,
         },
       };
     }
@@ -589,5 +596,6 @@ module.exports = {
   likePost,
   addSavedPost,
   hidePost,
+  postCreationTime,
   removeFile,
 };
